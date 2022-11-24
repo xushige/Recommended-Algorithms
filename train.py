@@ -105,14 +105,12 @@ def targeting(model=DSSM):
         inputs=[target_ad_input, profile_feature_input],
         outputs=output
     )
-    # compile
     Target_model.compile(
         optimizer='adam',
         learning_rate=tf.keras.optimizers.schedules.InverseTimeDecay(1e-3, epochs//3, 0.5),
         loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
         metrics=['accuracy']
     )
-    # fit
     Target_model.fit(
         [target_ad, profile_feature],
         [ctr_label],
