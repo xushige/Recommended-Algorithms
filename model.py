@@ -472,6 +472,8 @@ class Transformer(tf.keras.Model):
             tf.keras.layers.Dense(1, activation='sigmoid')
         ])
         self.flatten = tf.keras.layers.Flatten()
+        self.layernorm = tf.keras.layers.LayerNormalization()
+        self.relu = tf.keras.layers.Activation('relu')
         self.embedding_feature = embedding_feature
 
     def call(self, target_ad, ubs_feature, profile_feature, context_feature):
@@ -496,8 +498,8 @@ class Transformer(tf.keras.Model):
             # softmax(q * k / att_dim ** 0.5) * v
             att = tf.matmul(tf.nn.softmax(tf.matmul(q_out, tf.transpose(k_out, [0, 1, 3, 2])) / (self.att_dim ** 0.5), axis=-1), v_out)
             att_out = self.linear['ItemFc_%d'%(i)](tf.reshape(tf.transpose(att, [0, 2, 1, 3]), [-1, att.shape[2], self.att_dim*self.head_num]))
-            ubs_feature_tensor += att_out
-        ubs_feature = ubs_feature_tensor / float(ubs_feature.shape[1])
+            ubs_feature_tensor += self.layernorm(att_out)
+        ubs_feature = self.relu(ubs_feature_tensor / float(ubs_feature.shape[1]))
         # 特征concat
         total_embedding = tf.concat([
             self.flatten(ubs_feature),
