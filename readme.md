@@ -6,5 +6,5 @@
 ### 训练代码运行样例
 ```
 $ cd Recommend-System
-$ python recommend_train.py --model ESMM
+$ python train.py --model ESMM
 ```
